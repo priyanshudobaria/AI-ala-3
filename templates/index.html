@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Health Advisor Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #e6f2ff;
+            padding: 20px;
+        }
+        .chat-box {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+        }
+        .chat-log {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+        .chat-log div {
+            margin: 5px 0;
+        }
+        .user { text-align: right; color: blue; }
+        .bot { text-align: left; color: green; }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+        }
+        button {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-box">
+        <h2>🤖 Student Health Advisor</h2>
+        <div class="chat-log" id="chat-log"></div>
+        <input type="text" id="user-input" placeholder="Type your health question...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById("user-input");
+            const chatLog = document.getElementById("chat-log");
+            const message = userInput.value.trim();
+
+            if (!message) return;
+
+            // Show user message
+            chatLog.innerHTML += `<div class="user"><strong>You:</strong> ${message}</div>`;
+
+            // Clear input
+            userInput.value = "";
+
+            // Send to Flask backend
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message })
+            });
+
+            const data = await response.json();
+
+            // Show bot response
+            chatLog.innerHTML += `<div class="bot"><strong>Bot:</strong> ${data.response.replace(/\n/g, '<br>')}</div>`;
+
+            // Scroll to bottom
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        // Allow Enter key to send message
+        document.getElementById("user-input").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
